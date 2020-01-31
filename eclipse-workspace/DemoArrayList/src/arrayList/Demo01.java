@@ -9,15 +9,25 @@ public class Demo01 {
 		// 
 		ArrayList al = new ArrayList();
 		//
+//		System.out.println("size:"+al.size());
+//	
+//		Clerk clerk = new Clerk();
+//		
+//		al.add(clerk);
+//		
+//		System.out.println("size:"+al.size());
+		
+		Clerk clerk1 = new Clerk("song",49,1999);
+		Clerk clerk2 = new Clerk("wu",45,1599);
+		
+		al.add(clerk1);
+		al.add(clerk2);
+		
+//		Clerk temp = (Clerk)al.get(0);
+//		
+//		System.out.println("first clerks name:"+temp.getName());
+		al.remove(0);	
 		System.out.println("size:"+al.size());
-	
-		Clerk clerk = new Clerk();
-		
-		al.add(clerk);
-		
-		System.out.println("size:"+al.size());
-		
-		
 	}
 
 }
