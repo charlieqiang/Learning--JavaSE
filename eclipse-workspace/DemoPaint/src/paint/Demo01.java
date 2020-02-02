@@ -31,7 +31,7 @@ public class Demo01 extends JFrame{
 		
 		this.add(mp);
 		
-		this.setSize(400, 300);
+		this.setSize(400, 500);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);;
 		this.setVisible(true);
 		  
@@ -40,7 +40,7 @@ public class Demo01 extends JFrame{
 
 class MyPanel extends JPanel
 {
-	//override paint
+	//override paint 
 	//Graphics is a pen		
 	public void paint(Graphics g) {
 		//this cant be ignore
@@ -59,6 +59,8 @@ class MyPanel extends JPanel
 		//5.draw font
 		g.setFont(new Font("»ªÎÄ²ÊÔÆ",Font.BOLD,50));
 		g.drawString("hello", 100, 100);
+		g.drawArc(100, 100, 120, 300, 50, -100);
+		
 		
 	}
 }
