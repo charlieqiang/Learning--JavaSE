@@ -1,7 +1,3 @@
-/**
- * @author Charlie
- * Feature sell ticket
- */
 package thread;
 
 public class Demo01 {
