@@ -5,13 +5,20 @@
  * 3.i can keep shoting 
  * 4.the etank will boom
  * 5.the etank will shot
- * 6.测试我的utf-8,haha
- * 7.
- * 
+ * 6.测试我的utf-8,haha	
+ * 7.avoid crash(*)
+ * 		7.1 i will check crack in enemyTankclass 
+ * 8.design level
+ *      8.1 level panel
+ *      8.2 twinkle
+ * 9.pause(*)
+ * 10.record(*)
+ * 11.can add wav(*) 
  */
-package tankGame3;
+package tankGame4;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Panel;
@@ -24,35 +31,102 @@ import java.util.Vector;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
-public class MyTankGame3 extends JFrame{
+public class MyTankGame4 extends JFrame{
 
 	MyPanel mp = null;
+
+	MyStartPanel msp = null;
+	
+	//menu
+	JMenuBar jmb=null;
+	
+	//item
+	JMenu jm01=null;
+	JMenuItem jmi01=null;
+	
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		MyTankGame3 mtg = new MyTankGame3();
+		MyTankGame4 mtg = new MyTankGame4();
 	}
 	
-	public MyTankGame3() {
-		mp = new MyPanel();
+	public MyTankGame4() {
+//		mp = new MyPanel();
 		
 		//run
-		Thread t = new Thread(mp);
-		t.start();
+//		Thread t = new Thread(mp);
+//		t.start();
+//		
+//		this.add(mp);
+//		
+//		//Register to monitor
+//		this.addKeyListener((KeyListener) mp);
 		
-		this.add(mp);
+		//new menu and item
+		jmb = new JMenuBar();
+		jm01 = new JMenu("游戏（G）");
+		//shotcut
+		jm01.setMnemonic('G');
+		//
+		jmi01 = new JMenuItem("开始新游戏（N）");
 		
-		//Register to monitor
-		this.addKeyListener((KeyListener) mp);
-		this.setSize(400,300);
+		jm01.add(jmi01);
+		
+		jmb.add(jm01);
+		
+		
+		
+		msp = new MyStartPanel();
+		Thread mspTr = new Thread(msp);
+		mspTr.start();
+		
+		//
+		this.add(msp);
+		this.setSize(600,500);
 		this.setVisible(true);
-		
 		
 	}
 }
 
+//
+class MyStartPanel extends JPanel implements Runnable{
+	
+	int twinFlag=0;
+	
+	public void paint(Graphics g) {
+		super.paint(g);
+		g.fillRect(0, 0, 400, 300);
+		
+		if(twinFlag%2==0) {
+			g.setColor(Color.yellow);
+			Font myFont = new Font("华文新魏", Font.BOLD, 30);
+			g.setFont(myFont);
+			g.drawString("stage:1", 150, 150);
+		}
+
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while(true) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			twinFlag++;
+			this.repaint();
+		}
+	}
+}
 //game main panel
 class MyPanel extends JPanel implements KeyListener,Runnable{	
 	
@@ -79,6 +153,9 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 			EnemyTank et = new EnemyTank((i+1)*50,0);
 			et.setColor(0);
 			et.setDirect(2);
+			//push msg to enemytank class
+			et.setEts(est);
+			
 			est.add(et);
 			//run a etank
 			Thread ettr = new Thread(et);
