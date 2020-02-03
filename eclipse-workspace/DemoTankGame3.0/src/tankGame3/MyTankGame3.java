@@ -6,6 +6,8 @@
  * 4.the etank will boom
  * 5.the etank will shot
  * 6.测试我的utf-8,haha
+ * 7.i can boom
+ * 
  */
 package tankGame3;
 
@@ -103,7 +105,9 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 		g.fillRect(0, 0, 400, 300);
 		
 		//draw my tank
-		this.drawTank(hero.getX(), hero.getY(), g, this.hero.direct, this.hero.color);
+		if(hero.isLive) {
+			this.drawTank(hero.getX(), hero.getY(), g, this.hero.direct, this.hero.color);
+		}
 		
 		//draw shots
 		for(int i=0;i<hero.ss.size();i++) {
@@ -168,9 +172,46 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 		
 		
 	}
-
+	
 	//
-	public void hitTank(Shot s, EnemyTank et) {
+	public void hitEnemy() {
+		
+		//check if shot
+		for(int i=0;i<hero.ss.size();i++) {
+			//get shot
+			Shot myShot = hero.ss.get(i);
+			//check shot is live
+			if(myShot.isLive) {
+				for(int j=0;j<est.size();j++) {
+					//get every enemy
+					EnemyTank et = est.get(j);
+					if(et.isLive) {
+						this.hitTank(myShot,et);
+					}
+				}
+			}
+		}
+		
+	}
+	
+	//check if shot me
+	public void hitMe() {
+		//get etank
+		for(int i=0;i<this.est.size();i++) {
+			//get etank
+			EnemyTank et = est.get(i);
+			
+			//get etanksshot
+			for(int j=0;j<et.ss.size();j++) {
+				//get
+				Shot eneShot=et.ss.get(j);
+				
+				this.hitTank(eneShot, hero);
+			}
+		}
+	}
+	//check if shot enemy
+	public void hitTank(Shot s, Tank et) {
 		switch (et.direct) {
 		//w or s
 		case 0:
@@ -336,20 +377,10 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 				e.printStackTrace();
 			}
 			
-			//check if shot
-			for(int i=0;i<hero.ss.size();i++) {
-				//get shot
-				Shot myShot = hero.ss.get(i);
-				//check shot is live
-				if(myShot.isLive) {
-					for(int j=0;j<est.size();j++) {
-						EnemyTank et = est.get(j);
-						if(et.isLive) {
-							this.hitTank(myShot,et);
-						}
-					}
-				}
-			}
+			//check if shot enemy
+			this.hitEnemy();
+			//check if i was shoted
+			this.hitMe();
 			
 			//dynamic
 			this.repaint();
