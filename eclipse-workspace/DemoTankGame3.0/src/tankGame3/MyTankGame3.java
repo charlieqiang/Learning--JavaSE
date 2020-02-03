@@ -2,11 +2,14 @@
  * @author Charlie
  * 1.draw the tank
  * 2.my tank can fire and move
+ * 3.i can keep shoting 
+ * 4.the etank will boom
+ * 5.the etank will shot
+ * 6.测试我的utf-8,haha
  */
 package tankGame3;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Panel;
@@ -33,12 +36,14 @@ public class MyTankGame3 extends JFrame{
 		//run
 		Thread t = new Thread(mp);
 		t.start();
+		
 		this.add(mp);
 		
 		//Register to monitor
 		this.addKeyListener((KeyListener) mp);
 		this.setSize(400,300);
 		this.setVisible(true);
+		
 		
 	}
 }
@@ -51,19 +56,40 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 	Hero hero = null;
 	//set enemy tank
 	Vector<EnemyTank> est = new Vector<EnemyTank>();
+	//set boom set
+	Vector<Bomb> bombs = new Vector<Bomb>();
 	
+	//set boom gif
+	Image image1 = null;
+	Image image2 = null;
+	Image image3 = null;
 	
 	public MyPanel() {
 		
 		//my tank
 		hero = new Hero(100, 100);
-		//enem
+		//enem tanks
 		for(int i=0;i<enSize;i++) {
+			//new a etank
 			EnemyTank et = new EnemyTank((i+1)*50,0);
 			et.setColor(0);
 			et.setDirect(2);
 			est.add(et);
+			//run a etank
+			Thread ettr = new Thread(et);
+			ettr.start();
+			//add a shot
+			Shot s = new Shot(et.x+10, et.y+30, et.direct);
+			Thread estr = new Thread(s);
+			estr.start();
+			//join ets
+			est.add(et);
+
 		}
+		//boom gif
+		image1 = Toolkit.getDefaultToolkit().getImage(Panel.class.getResource("/bomb_1.gif"));
+		image2 = Toolkit.getDefaultToolkit().getImage(Panel.class.getResource("/bomb_2.gif"));
+		image3 = Toolkit.getDefaultToolkit().getImage(Panel.class.getResource("/bomb_3.gif"));
 		
 	}
 	
@@ -81,28 +107,66 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 		
 		//draw shots
 		for(int i=0;i<hero.ss.size();i++) {
-			
+		
 			Shot myShot = hero.ss.get(i);
-			
 			//draw a shot
 			if(myShot!=null&&myShot.isLive==true) {
 				g.draw3DRect(myShot.x, myShot.y, 1, 1, false);
 			}
 			
-			if(myShot.isLive!=true) {
+			if(myShot.isLive==false) {
 				hero.ss.remove(myShot);
 			}
+			
 		}
 		
-		//draw enmey tank
+		//draw bomb
+		for(int i=0;i<bombs.size();i++) {
+			
+			System.out.println("bombs.size():"+bombs.size());
+			//get bomb
+			Bomb b = bombs.get(i);
+			
+			//the first time it not display!!
+			if(b.life>6) {
+				g.drawImage(image1, b.x, b.y, 30, 30, this);
+				//System.out.println("b.life:"+b.life);
+			}
+			if(b.life>3) {
+				g.drawImage(image2, b.x, b.y, 30, 30, this);				
+			}
+			if(b.life>0){
+				g.drawImage(image3, b.x, b.y, 30, 30, this);	
+				
+			}
+			//
+			b.lifeDown();
+			//if die remove bombs
+			if(b.life<=0) {
+				bombs.remove(b);
+			}
+			
+		}
+		
+		//draw enmey tank;check if enemy should add shot
 		for(int i=0;i<est.size();i++)
 		{
 			EnemyTank et = est.get(i);
 			if(et.isLive) {
 				this.drawTank(et.getX(), et.getY(), g, et.direct, et.color);
-			}
-			
+				//draw eshot
+				for(int j=0;j<et.ss.size();j++) {
+					Shot enemyShot = et.ss.get(j);
+					if(enemyShot.isLive	) {
+						g.draw3DRect(enemyShot.x, enemyShot.y, 1, 1, false);
+					}else {
+						et.ss.remove(enemyShot);
+					}
+				}
+			}	
 		}
+		
+		
 	}
 
 	//
@@ -115,7 +179,12 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 				//shot!
 				//s die
 				s.isLive=false;
+				//enemy tank will die and boom
 				et.isLive=false;
+				//new boom
+				Bomb b = new Bomb(et.x, et.y);
+				//push into vector
+				bombs.add(b);
 			}
 			break;
 		//a or d
@@ -125,14 +194,21 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 				//shot!
 				//s die
 				s.isLive=false;
+				//enemy tank will die and boom
 				et.isLive=false;
+				//new boom
+				Bomb b = new Bomb(et.x, et.y);
+				//push into vector
+				bombs.add(b);
+				
 			}
 			break;
 		default:
 			break;
 		}
 	}
-	//
+	
+	//design a drawtank function
 	public void drawTank(int x, int y, Graphics g, int direct, int type) { 
 		// check type
 		switch(type) 
@@ -232,8 +308,7 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 				this.hero.shotEnemy();
 			}
 		}
-		
-		this.repaint();
+		//this.repaint();
 	}
 	 
 	@Override
@@ -275,6 +350,8 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 					}
 				}
 			}
+			
+			//dynamic
 			this.repaint();
 		}
 	}
