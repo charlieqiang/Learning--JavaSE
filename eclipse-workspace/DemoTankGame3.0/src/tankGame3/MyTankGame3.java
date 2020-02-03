@@ -6,7 +6,7 @@
  * 4.the etank will boom
  * 5.the etank will shot
  * 6.测试我的utf-8,haha
- * 7.i can boom
+ * 7.
  * 
  */
 package tankGame3;
