@@ -1,5 +1,5 @@
 /**
- * @author Charlie
+ * @Description
  * 1.draw the tank
  * 2.my tank can fire and move
  * 3.i can keep shoting 
@@ -12,8 +12,15 @@
  *      8.1 level panel
  *      8.2 twinkle
  * 9.pause(*)
+ * 		9.1 set speed into zero and dont change direct
  * 10.record(*)
+ * 		10.1 fileFlows
+ * 		10.2 new a class
+ * 		10.3 record the goal
+ * 		10.4 exit and save all the msg
  * 11.can add wav(*) 
+ * @author Charlie
+ * @date 2020-02-04 13:08
  */
 package tankGame4;
 
@@ -23,6 +30,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Panel;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
@@ -36,7 +45,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
-public class MyTankGame4 extends JFrame{
+public class MyTankGame4 extends JFrame implements ActionListener{
 
 	MyPanel mp = null;
 
@@ -47,8 +56,12 @@ public class MyTankGame4 extends JFrame{
 	
 	//item
 	JMenu jm01=null;
+	//startGame
 	JMenuItem jmi01=null;
-	
+	//exitGame
+	JMenuItem jmi02=null;
+	//exitGame
+	JMenuItem jmi03=null;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -56,40 +69,83 @@ public class MyTankGame4 extends JFrame{
 	}
 	
 	public MyTankGame4() {
-//		mp = new MyPanel();
-		
-		//run
-//		Thread t = new Thread(mp);
-//		t.start();
-//		
-//		this.add(mp);
-//		
-//		//Register to monitor
-//		this.addKeyListener((KeyListener) mp);
 		
 		//new menu and item
 		jmb = new JMenuBar();
 		jm01 = new JMenu("游戏（G）");
-		//shotcut
 		jm01.setMnemonic('G');
+		
 		//
 		jmi01 = new JMenuItem("开始新游戏（N）");
+		jmi02 = new JMenuItem("退出游戏（E）");
+		jmi03 = new JMenuItem("存盘退出（S）");
+
+		//shotcut
+		jmi01.setMnemonic('N');
+		jmi02.setMnemonic('E');
+		jmi03.setMnemonic('S');
 		
-		jm01.add(jmi01);
+		//register monitor
+		jmi01.addActionListener(this);
+		jmi02.addActionListener(this);
+		jmi03.addActionListener(this);
+		jmi01.setActionCommand("newGame");
+		jmi02.setActionCommand("exit");
+		jmi03.setActionCommand("saveExit");
 		
+		jm01.add(jmi01); 
+		jm01.add(jmi02); 
+		jm01.add(jmi03); 
 		jmb.add(jm01);
-		
-		
 		
 		msp = new MyStartPanel();
 		Thread mspTr = new Thread(msp);
 		mspTr.start();
 		
 		//
+		this.setJMenuBar(jmb);
 		this.add(msp);
 		this.setSize(600,500);
 		this.setVisible(true);
 		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		if(arg0.getActionCommand().equals("newGame")) {
+			mp = new MyPanel();
+			
+			//run
+			Thread t = new Thread(mp);
+			t.start();
+			//remove old panel and add new panel
+			this.remove(msp);
+			this.add(mp);
+			
+			//Register to monitor
+			this.addKeyListener((KeyListener) mp);
+			//refresh new panel
+			this.setVisible(true);
+			
+		}
+		else if (arg0.getActionCommand().equals("exit")) {
+			
+			Recorder.keepRecording();
+			//exit
+			System.exit(0);
+			
+		}
+		else if (arg0.getActionCommand().equals("saveExit")){
+			
+			Recorder rd = new Recorder();
+			//push msg
+			rd.setEts(mp.est);
+			//save and exit
+			rd.keepRecAndEnemyTank();
+			//exit
+			System.exit(0);
+		}
 	}
 }
 
@@ -130,7 +186,8 @@ class MyStartPanel extends JPanel implements Runnable{
 //game main panel
 class MyPanel extends JPanel implements KeyListener,Runnable{	
 	
-	int enSize = 3;
+	
+	int enSize = Recorder.getEnNum();
 	//set my tank
 	Hero hero = null;
 	//set enemy tank
@@ -145,6 +202,8 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 	
 	public MyPanel() {
 		
+		//recover
+		Recorder.getRecording();
 		//my tank
 		hero = new Hero(100, 100);
 		//enem tanks
@@ -153,20 +212,24 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 			EnemyTank et = new EnemyTank((i+1)*50,0);
 			et.setColor(0);
 			et.setDirect(2);
+			
+			//join ets into estVector
+			est.add(et);
+			
+			//add a shot
+			Shot s = new Shot(et.x+10, et.y+30, et.direct);
+			
 			//push msg to enemytank class
 			et.setEts(est);
 			
-			est.add(et);
 			//run a etank
 			Thread ettr = new Thread(et);
 			ettr.start();
-			//add a shot
-			Shot s = new Shot(et.x+10, et.y+30, et.direct);
+					
+			//run a eshot tr
 			Thread estr = new Thread(s);
 			estr.start();
-			//join ets
-			est.add(et);
-
+			
 		}
 		//boom gif
 //		image1 = Toolkit.getDefaultToolkit().getImage(Panel.class.getResource("/bomb_1.gif"));
@@ -185,6 +248,31 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 	}
 	
 	//
+	public void showInfo(Graphics g) {
+		//draw tips
+		//en
+		this.drawTank(80,330,g,0,0);
+		g.setColor(Color.black);
+		g.drawString(Recorder.getEnNum()+"", 110, 350);
+		//me
+		this.drawTank(145,330,g,0,1);
+		g.setColor(Color.black);
+		g.drawString(Recorder.getMyLife()+"", 175, 350);
+		
+		//goal msg
+		g.setColor(Color.black);
+		Font f = new Font("宋体",Font.BOLD,20);
+		g.setFont(f);
+		g.drawString("您的总成绩", 420, 30);
+		
+		//
+		this.drawTank(420, 60, g, 0, 0);
+		g.setColor(Color.black);
+		g.drawString(Recorder.getAllEnNum()+"", 460, 80);
+		
+		
+	}
+	//
 	public void paint(Graphics g) {
 		//this cant be ignore
 		//1.init
@@ -192,6 +280,9 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 		
 		//game main backgroundcolor
 		g.fillRect(0, 0, 400, 300);
+
+		//show tips
+		this.showInfo(g);
 		
 		//draw my tank
 		if(hero.isLive) {
@@ -275,7 +366,12 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 					//get every enemy
 					EnemyTank et = est.get(j);
 					if(et.isLive) {
-						this.hitTank(myShot,et);
+						if(this.hitTank(myShot,et)) {
+							//
+							Recorder.reduceEnNum();
+							//
+							Recorder.addEnNum();
+						}
 					}
 				}
 			}
@@ -299,8 +395,11 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 			}
 		}
 	}
+	
 	//check if shot enemy
-	public void hitTank(Shot s, Tank et) {
+	public boolean hitTank(Shot s, Tank et) {
+		
+		boolean hitted=false;
 		switch (et.direct) {
 		//w or s
 		case 0:
@@ -311,6 +410,8 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 				s.isLive=false;
 				//enemy tank will die and boom
 				et.isLive=false;
+				//
+				hitted=true;
 				//new boom
 				Bomb b = new Bomb(et.x, et.y);
 				//push into vector
@@ -326,6 +427,8 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 				s.isLive=false;
 				//enemy tank will die and boom
 				et.isLive=false;
+				//
+				hitted=true;
 				//new boom
 				Bomb b = new Bomb(et.x, et.y);
 				//push into vector
@@ -336,6 +439,8 @@ class MyPanel extends JPanel implements KeyListener,Runnable{
 		default:
 			break;
 		}
+		
+		return hitted;
 	}
 	
 	//design a drawtank function

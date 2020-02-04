@@ -1,7 +1,147 @@
 package tankGame4;
 
-import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.Vector;
+
+//recorder can remember your set
+class Recorder{
+	//how much enemy
+	private static int enNum=3;
+	//how much life
+	private static int myLife=3;
+	//goal
+	private static int allEnNum=0;
+	//
+	private static FileWriter fw=null;
+	private static FileReader fr=null;
+	private static BufferedWriter bw=null;
+	private static BufferedReader br=null;
+
+	private Vector<EnemyTank> ets = new Vector<EnemyTank>();
+
+	public Vector<EnemyTank> getEts() {
+		return ets;
+	}
+
+	public void setEts(Vector<EnemyTank> ets_debug) {
+		
+		this.ets = ets_debug;
+		System.out.println("ok!");
+	}
+
+	//save pos direct
+	public void keepRecAndEnemyTank() {
+		try {
+			fw = new FileWriter(".\\src\\myRecording.txt");
+			bw = new BufferedWriter(fw);
+			
+			bw.write(enNum+"\r\n");
+			
+			//save living pos
+			for(int i=0;i<ets.size();i++) {
+				
+				//get first etank
+				EnemyTank et = ets.get(i);
+				if(et.isLive) {
+					String record = et.x+" "+et.y;
+					//in
+					bw.write(record+"\r\n");
+				}
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}finally {
+			try {
+				//后开先关
+				bw.close();
+				fw.close();
+			} catch (Exception e2) {
+				// TODO: handle exception
+			}
+		}
+		
+	}
+	
+	//recode
+	public static void keepRecording() {
+		try {
+			fw = new FileWriter(".\\src\\myRecording.txt");
+			bw = new BufferedWriter(fw);
+			
+			bw.write(allEnNum+"\r\n");
+		} catch (Exception e) {
+			// TODO: handle exception
+		}finally {
+			try {
+				//后开先关
+				bw.close();
+				fw.close();
+			} catch (Exception e2) {
+				// TODO: handle exception
+			}
+		}
+		
+	}
+	
+	//get record
+	public static void getRecording() {
+		try {
+			fr =new FileReader(".\\src\\myRecording.txt");
+			br = new BufferedReader(fr);
+			String n = br.readLine();
+			
+			allEnNum=Integer.parseInt(n);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			// TODO: handle exception
+		} finally {
+			try {
+				br.close();
+				fr.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				// TODO: handle exception
+			}
+		}
+	}
+	
+	
+	public static int getAllEnNum() {
+		return allEnNum;
+	}
+	public static void setAllEnNum(int allEnNum) {
+		Recorder.allEnNum = allEnNum;
+	}
+	public static int getEnNum() {
+		return enNum;
+	}
+	public static void setEnNum(int enNum) {
+		Recorder.enNum = enNum;
+	}
+	public static int getMyLife() {
+		return myLife;
+	}
+	public static void setMyLife(int myLife) {
+		Recorder.myLife = myLife;
+	}
+
+	//
+	public static void reduceEnNum() {
+		enNum--;
+	}
+	//
+	public static void addEnNum() {
+		allEnNum++;
+	}	
+	
+
+	
+}
 
 //
 class Bomb{
@@ -73,7 +213,7 @@ class Shot implements Runnable {
 			//when does shot die? 
 			if(x<0||x>400||y<0||y>300) {
 				this.isLive = false;
-				System.out.println("pos:x="+x+",y="+y);
+//				System.out.println("pos:x="+x+",y="+y);
 				break;
 			}
 		}
@@ -210,7 +350,6 @@ class EnemyTank extends Tank implements Runnable{
 	
 	//get msg from panel
 	Vector<EnemyTank> est = new Vector<EnemyTank>();
-
 	
 	//
 	public EnemyTank(int x, int y) {
