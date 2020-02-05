@@ -19,6 +19,7 @@
  * 		10.3 record the goal
  * 		10.4 exit and save all the msg
  * 11.can add wav(*) 
+ * 		11.1 waver
  * @author Charlie
  * @date 2020-02-04 13:08
  */
@@ -62,6 +63,8 @@ public class MyTankGame4 extends JFrame implements ActionListener{
 	JMenuItem jmi02=null;
 	//exitGame
 	JMenuItem jmi03=null;
+	//
+	JMenuItem jmi04=null;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -79,23 +82,31 @@ public class MyTankGame4 extends JFrame implements ActionListener{
 		jmi01 = new JMenuItem("开始新游戏（N）");
 		jmi02 = new JMenuItem("退出游戏（E）");
 		jmi03 = new JMenuItem("存盘退出（S）");
+		jmi04 = new JMenuItem("继续上局（C）");
 
 		//shotcut
 		jmi01.setMnemonic('N');
 		jmi02.setMnemonic('E');
 		jmi03.setMnemonic('S');
+		jmi03.setMnemonic('C');
 		
 		//register monitor
 		jmi01.addActionListener(this);
 		jmi02.addActionListener(this);
 		jmi03.addActionListener(this);
+		jmi04.addActionListener(this);
+		
+		//set actSource
 		jmi01.setActionCommand("newGame");
 		jmi02.setActionCommand("exit");
 		jmi03.setActionCommand("saveExit");
+		jmi04.setActionCommand("conGame");
 		
 		jm01.add(jmi01); 
 		jm01.add(jmi02); 
 		jm01.add(jmi03); 
+		jm01.add(jmi04);
+		
 		jmb.add(jm01);
 		
 		msp = new MyStartPanel();
@@ -114,7 +125,7 @@ public class MyTankGame4 extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent arg0) {
 		// TODO Auto-generated method stub
 		if(arg0.getActionCommand().equals("newGame")) {
-			mp = new MyPanel();
+			mp = new MyPanel("newGame");
 			
 			//run
 			Thread t = new Thread(mp);
@@ -145,6 +156,22 @@ public class MyTankGame4 extends JFrame implements ActionListener{
 			rd.keepRecAndEnemyTank();
 			//exit
 			System.exit(0);
+		}
+		else if (arg0.getActionCommand().equals("conGame")){
+			mp = new MyPanel("con");
+
+			//run
+			Thread t = new Thread(mp);
+			t.start();
+			//remove old panel and add new panel
+			this.remove(msp);
+			this.add(mp);
+			
+			//Register to monitor
+			this.addKeyListener((KeyListener) mp);
+			//refresh new panel
+			this.setVisible(true);
+			
 		}
 	}
 }
@@ -186,51 +213,89 @@ class MyStartPanel extends JPanel implements Runnable{
 //game main panel
 class MyPanel extends JPanel implements KeyListener,Runnable{	
 	
-	
 	int enSize = Recorder.getEnNum();
 	//set my tank
 	Hero hero = null;
+
 	//set enemy tank
 	Vector<EnemyTank> est = new Vector<EnemyTank>();
 	//set boom set
 	Vector<Bomb> bombs = new Vector<Bomb>();
+	//set old node
+	Vector<Node> nodes = new Vector<Node>();
 	
 	//set boom gif
 	Image image1 = null;
 	Image image2 = null;
 	Image image3 = null;
 	
-	public MyPanel() {
+	public MyPanel(String flag) {
 		
 		//recover
 		Recorder.getRecording();
 		//my tank
 		hero = new Hero(100, 100);
-		//enem tanks
-		for(int i=0;i<enSize;i++) {
-			//new a etank
-			EnemyTank et = new EnemyTank((i+1)*50,0);
-			et.setColor(0);
-			et.setDirect(2);
+		
+		if(flag.equals("newGame")) {
+			//enem tanks
+			for(int i=0;i<enSize;i++) {
+				//new a etank
+				EnemyTank et = new EnemyTank((i+1)*50,0);
+				et.setColor(0);
+				et.setDirect(2);
+				
+				//join ets into estVector
+				est.add(et);
+				
+				//add a shot
+				Shot s = new Shot(et.x+10, et.y+30, et.direct);
+				
+				//push msg to enemytank class
+				et.setEts(est);
+				
+				//run a etank
+				Thread ettr = new Thread(et);
+				ettr.start();
+						
+				//run a eshot tr
+				Thread estr = new Thread(s);
+				estr.start();
+				
+			}
+		}else {
 			
-			//join ets into estVector
-			est.add(et);
-			
-			//add a shot
-			Shot s = new Shot(et.x+10, et.y+30, et.direct);
-			
-			//push msg to enemytank class
-			et.setEts(est);
-			
-			//run a etank
-			Thread ettr = new Thread(et);
-			ettr.start();
-					
-			//run a eshot tr
-			Thread estr = new Thread(s);
-			estr.start();
-			
+//			flag="com";
+			nodes=new Recorder().getNodesAndEnNums();
+			//enem tanks
+			for(int i=0;i<nodes.size();i++) {
+				
+				//
+				Node node=nodes.get(i);
+				//new a etank
+				EnemyTank et = new EnemyTank(node.x,node.y);
+				et.setColor(0);
+				et.setDirect(node.direct);
+				
+				//join ets into estVector
+
+				
+				//add a shot
+				Shot s = new Shot(et.x+10, et.y+30, et.direct);
+				
+				//push msg to enemytank class
+				et.setEts(est);
+				
+				//run a etank
+				Thread ettr = new Thread(et);
+				ettr.start();
+						
+				//run a eshot tr
+				Thread estr = new Thread(s);
+				estr.start();
+				
+			}
 		}
+
 		//boom gif
 //		image1 = Toolkit.getDefaultToolkit().getImage(Panel.class.getResource("/bomb_1.gif"));
 //		image2 = Toolkit.getDefaultToolkit().getImage(Panel.class.getResource("/bomb_2.gif"));

@@ -6,6 +6,20 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Vector;
 
+//
+class Node{
+	int x;
+	int y;
+	int direct;
+	//
+	public Node(int x,int y,int direct) {
+		// TODO Auto-generated constructor stub
+		this.x=x;
+		this.y=y;
+		this.direct=direct;
+	}
+	
+}
 //recorder can remember your set
 class Recorder{
 	//how much enemy
@@ -14,14 +28,52 @@ class Recorder{
 	private static int myLife=3;
 	//goal
 	private static int allEnNum=0;
-	//
+	//recover node
+	static Vector<Node> nodes = new Vector<Node>();
+	
 	private static FileWriter fw=null;
 	private static FileReader fr=null;
 	private static BufferedWriter bw=null;
 	private static BufferedReader br=null;
-
+	//
 	private Vector<EnemyTank> ets = new Vector<EnemyTank>();
-
+	//
+	public Vector<Node> getNodesAndEnNums() {
+		try {
+			fr =new FileReader(".\\src\\myRecording.txt");
+			br = new BufferedReader(fr);
+			String n = "";
+			//read firstLine
+			n= br.readLine();
+			
+			allEnNum = Integer.parseInt(n);
+			while ((n=br.readLine())!=null) {
+				String []xyz=n.split(" ");
+//				for(int i=0;i<xyz.length;i++) {
+//					
+//				}
+				Node node = new Node(Integer.parseInt(xyz[0]),Integer.parseInt(xyz[1]),Integer.parseInt(xyz[2]));
+				//
+				nodes.add(node);
+			}
+		
+			allEnNum=Integer.parseInt(n);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			// TODO: handle exception
+		} finally {
+			try {
+				br.close();
+				fr.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				// TODO: handle exception
+			}
+		}
+		return nodes;
+	}
+	
 	public Vector<EnemyTank> getEts() {
 		return ets;
 	}
