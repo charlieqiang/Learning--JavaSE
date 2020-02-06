@@ -1,15 +1,14 @@
+/**
+ * @Description JDBC-SQL
+ * @author Charlie
+ * @date 2020-02-06 22:39
+ */
 package sqlJDBC;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-/**
- * @Description JDBC-SQL
- * @author Charlie
- * @date 2020-02-06 21:32
- */
 import javax.naming.spi.DirStateFactory.Result;
 
 public class Demo01 {
