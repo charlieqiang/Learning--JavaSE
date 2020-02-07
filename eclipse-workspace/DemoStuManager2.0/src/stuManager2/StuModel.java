@@ -1,9 +1,4 @@
-/**
- * @Description stumanager with db
- * @author Charlie
- * @date 2020-02-06 22:39
- */
-package stuManager;
+package stuManager2;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,37 +7,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
 
-import javax.naming.spi.DirStateFactory.Result;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import java.util.Vector;
+import javax.swing.AbstractAction;
+import javax.swing.table.AbstractTableModel;
 
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-
-public class Demo01 extends JFrame{
+public class StuModel extends AbstractTableModel{
 	//set row and col
-	Vector rowData,columnNames;
-	//about view
-	JTable jt=null;
-	JScrollPane jsp=null;
+	Vector rowData;
+	Vector columnNames;
 	//about sql
 	PreparedStatement ps=null;
 	Connection ct=null;
 	ResultSet rs=null;
-	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		Demo01 d01 = new Demo01();
-	}
 
-	//constructor 
-	public Demo01() {
+	//
+	public void init(String sql) {
+		if(sql.equals("")) {
+			sql="select * from stu";
+		}
 		//newed
 		columnNames = new Vector();
 		rowData = new Vector();
+		
 		//col
 		columnNames.add("学号");
 		columnNames.add("名字");
@@ -51,8 +36,7 @@ public class Demo01 extends JFrame{
 		columnNames.add("籍贯");
 		columnNames.add("系别");
 		
-		
-		//get data    from sql
+		//get data from sql
 		try {
 			//
 			Class.forName("com.microsoft.jdbc.sqlserver.SQLServerDriver");
@@ -61,7 +45,7 @@ public class Demo01 extends JFrame{
 					("jdbc:microsoft:sqlserver://127.0.0.1:1433;"
 							+ "databaseName=spdb1","sa","123456");
 			//
-			ps = ct.prepareStatement("select * from stu");
+			ps = ct.prepareStatement(sql);
 			rs = ps.executeQuery();
 			
 			while(rs.next()) {
@@ -82,6 +66,7 @@ public class Demo01 extends JFrame{
 			e.printStackTrace();
 		} finally {
 			if(rs!=null) {
+				
 				try {
 					rs.close();
 				} catch (SQLException e) {
@@ -105,18 +90,49 @@ public class Demo01 extends JFrame{
 					e.printStackTrace();
 				}
 			}
-		}
-		
-		
-		//init JTable
-		jt = new JTable(rowData,columnNames);
-		//init jsp
-		jsp = new JScrollPane(jt);
-		//add jsp into jframe
-		this.add(jsp);
-		this.setSize(400,300);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setVisible(true); 
+		}	
 		
 	}
+	
+	//add
+	public void addStu(String sql) {
+		//
+	}
+	
+	//constructor
+	public StuModel(String sql) {
+		// TODO Auto-generated constructor stub
+		this.init(sql);
+
+	}
+	//constructor
+	public StuModel() {
+		// TODO Auto-generated constructor stub
+		this.init("");
+	}
+	//how many col
+	@Override
+	public int getColumnCount() {
+		// TODO Auto-generated method stub
+		//System.out.println(getColumnCount());
+		return this.columnNames.size();
+	}
+	//how mang row
+	@Override
+	public int getRowCount() {
+		// TODO Auto-generated method stub
+		return this.rowData.size();
+	}
+	//get value at sw.
+	@Override
+	public Object getValueAt(int row, int column) {
+		// TODO Auto-generated method stub
+		return ((Vector)this.rowData.get(row)).get(column);
+	}
+	@Override
+	public String getColumnName(int column) {
+		// TODO Auto-generated method stub
+		return (String)this.columnNames.get(column);
+	}
+
 }
